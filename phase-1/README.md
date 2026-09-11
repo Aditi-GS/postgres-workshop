@@ -27,7 +27,7 @@ Phase 1 is all about writes : how data gets into PostgreSQL, how WAL records tha
 
 ### Overview of the stages of a query:  
 1. A connection from an application program to the PostgreSQL server has to be established. The application program transmits a query to the server and waits to receive the results sent back by the server.  
-    - A supervisor process called `postmaster` and listens at a specified TCP/IP port for incoming connections.  Whenever it detects a request for a connection, it spawns a new backend process.  
+    - A supervisor process called `postmaster` listens at a specified TCP/IP port for incoming connections.  Whenever it detects a request for a connection, it spawns a new backend process.  
 2. The parser stage checks the query transmitted by the application program for correct syntax and creates a query tree.  
     - ***Lexer*** is defined in `scan.l` and is responsible for recognizing identifiers, the SQL key words etc. For every key word or identifier that is found, a token is generated and handed to the parser.  
     - ***Parser*** is defined in `gram.y` and consists of a set of grammar rules and actions that are executed whenever a rule is fired. The code of the actions (which is actually C code) is used to build up the parse tree.
