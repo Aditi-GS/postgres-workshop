@@ -28,7 +28,7 @@ def upgrade() -> None:
     7 = Helix
     """
     vendor_table = op.create_table('vendor_lookup',
-                    sa.Column('vendor_id', sa.INTEGER()),
+                    sa.Column('vendor_id', sa.SMALLINT()),
                     sa.Column('vendor_name', sa.VARCHAR(), nullable=False),
                     sa.PrimaryKeyConstraint('vendor_id', name="vendor_lookup_pk")
                     )

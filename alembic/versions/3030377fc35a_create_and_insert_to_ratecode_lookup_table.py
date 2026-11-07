@@ -32,7 +32,7 @@ def upgrade() -> None:
     """
 
     ratecode_table = op.create_table('ratecode_lookup',
-                                    sa.Column('ratecode_id', sa.FLOAT(), primary_key=True),
+                                    sa.Column('ratecode_id', sa.SMALLINT(), primary_key=True),
                                     sa.Column('ratecode_name', sa.VARCHAR(), nullable=True)
                                     )
     op.bulk_insert(

@@ -28,7 +28,13 @@ def upgrade() -> None:
                     sa.Column('service_zone', sa.VARCHAR)                    
                     )
     
-    CSV_FILE = os.path.abspath(r"taxi_zone_lookup.csv")
+    CSV_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data", "taxi_zone_lookup.csv")
+    CSV_FILE = os.path.normpath(CSV_FILE)
+
+    if not os.path.exists(CSV_FILE):
+        raise FileNotFoundError(f"CSV not found: {CSV_FILE}")
+
+    df = pd.read_csv(CSV_FILE)
     df_raw = pd.read_csv(CSV_FILE)
     df_raw.columns = [col.lower() for col in df_raw.columns]
     df = df_raw.rename(columns={

@@ -1,7 +1,7 @@
 """create indexes on trips
 
 Revision ID: eb575e66f63d
-Revises: bdec93e35103
+Revises: 3af5402fca85
 Create Date: 2026-04-19 14:35:37.523569
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'eb575e66f63d'
-down_revision: Union[str, Sequence[str], None] = 'bdec93e35103'
+down_revision: Union[str, Sequence[str], None] = '3af5402fca85'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

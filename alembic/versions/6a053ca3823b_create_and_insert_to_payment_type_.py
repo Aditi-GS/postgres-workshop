@@ -31,7 +31,7 @@ def upgrade() -> None:
     6 = Voided trip
     """
     payment_type_table = op.create_table('payment_type_lookup',
-                                        sa.Column('payment_type', sa.BIGINT(), primary_key=True),
+                                        sa.Column('payment_type', sa.SMALLINT(), primary_key=True),
                                         sa.Column('description', sa.VARCHAR(), nullable=False)
                                         )
     

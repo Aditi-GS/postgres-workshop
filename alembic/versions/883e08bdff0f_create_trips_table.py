@@ -22,27 +22,27 @@ def upgrade() -> None:
     op.execute("""
     CREATE TABLE trips (
         trip_id BIGSERIAL PRIMARY KEY,
-        vendor_id INT,
+        vendor_id SMALLINT,
         tpep_pickup_datetime TIMESTAMP,
         tpep_dropoff_datetime TIMESTAMP,
-        passenger_count INT,
-        trip_distance FLOAT,
-        ratecode_id INT,
-        store_and_fwd_flag VARCHAR(1) CHECK (store_and_fwd_flag IN ('Y','N')),
+        passenger_count SMALLINT,
+        trip_distance REAL,
+        ratecode_id SMALLINT,
+        store_and_fwd_flag CHAR(1) CHECK (store_and_fwd_flag IN ('Y','N')),
         pu_location_id INT,
         do_location_id INT,
-        payment_type INT,
-        fare_amount FLOAT,
-        extra FLOAT,
-        mta_tax FLOAT,
-        tip_amount FLOAT,
-        tolls_amount FLOAT,
-        improvement_surcharge FLOAT,
-        total_amount FLOAT,
-        congestion_surcharge FLOAT,
-        airport_fee FLOAT,
-        cbd_congestion_fee FLOAT
-    );
+        payment_type SMALLINT,
+        fare_amount REAL,
+        extra REAL,
+        mta_tax REAL,
+        tip_amount REAL,
+        tolls_amount REAL,
+        improvement_surcharge REAL,
+        total_amount REAL,
+        congestion_surcharge REAL,
+        airport_fee REAL,
+        cbd_congestion_fee REAL
+    );   
     """)
 
 def downgrade() -> None:
