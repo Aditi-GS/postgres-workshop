@@ -1,6 +1,6 @@
 ## Table Of Contents:
 0. [Phase 1 Objectives](#objectives)
-1. [Compare Insertion Methods](#part-1)  
+1. [Methods to Populate the DB](../phase-0/1-populate-the-db.md)  
 2. [WAL Deep Dive](#part-2)
 3. [Observability Baseline](#part-3)
 4. [COPY with INDEXES](#part-4)
@@ -22,21 +22,6 @@ Understand how PostgreSQL handles writes internally - WAL, transactions, commit 
 7. Partitioning by Time 
 
 Phase 1 is all about writes : how data gets into PostgreSQL, how WAL records that work, and what the cost of different commit strategies looks like.  
-
----
-
-### Overview of the stages of a query:  
-1. A connection from an application program to the PostgreSQL server has to be established. The application program transmits a query to the server and waits to receive the results sent back by the server.  
-    - A supervisor process called `postmaster` listens at a specified TCP/IP port for incoming connections.  Whenever it detects a request for a connection, it spawns a new backend process.  
-2. The parser stage checks the query transmitted by the application program for correct syntax and creates a query tree.  
-    - ***Lexer*** is defined in `scan.l` and is responsible for recognizing identifiers, the SQL key words etc. For every key word or identifier that is found, a token is generated and handed to the parser.  
-    - ***Parser*** is defined in `gram.y` and consists of a set of grammar rules and actions that are executed whenever a rule is fired. The code of the actions (which is actually C code) is used to build up the parse tree.
-    - The parser stage creates a parse tree using only fixed rules about the syntactic structure of SQL. It does not make any lookups in the system catalogs.  
-    - The reason for separating raw parsing from semantic analysis is that system catalog lookups can only be done within a transaction, and we do not wish to start a transaction immediately upon receiving a query string.  
-3. The rewrite system takes the query tree created by the parser stage and looks for any rules (stored in the system catalogs) to apply to the query tree. It performs the transformations given in the rule bodies.
-    - One application of the rewrite system is in the realization of views. Whenever a query against a view (i.e., a virtual table) is made, the rewrite system rewrites the user's query to a query that accesses the base tables given in the view definition instead.  
-4. The planner/optimizer takes the (rewritten) query tree and creates a query plan that will be the input to the executor.  
-5. The executor recursively steps through the plan tree and retrieves rows in the way represented by the plan. The executor makes use of the storage system while scanning relations, performs sorts and joins, evaluates qualifications and finally hands back the rows derived.  
 
 ---
 

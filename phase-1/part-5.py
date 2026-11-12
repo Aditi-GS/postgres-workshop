@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from config import settings
+from ../config import settings
 import pandas as pd
 from time import time
 import io
