@@ -135,3 +135,6 @@ no column change, key or otherwise
 6. Heap/INSERT+INIT
 7. Btree/NEWROOT
 8. XLOG/FPI_FOR_HINT
+9. CLOG/ZEROPAGE
+10. XLOG/CHECKPOINT_REDO
+11. Standby/RUNNING_XACTS
