@@ -103,7 +103,7 @@ def capture_env(stats_cur):
 
 # ----- STATS -----
 
-def snapshot(stats_cur, settings, phase):
+def snapshot(conn, stats_cur, settings, phase):
     '''
     Unlike pg_stat_statments which uses statement-completion hook, the cumulative stats/info
     are throttled by `PGSTAT_MIN_INTERVAL` (1s) or `stats_flush_interval` (10s). If the run finishes before 
@@ -164,6 +164,7 @@ def snapshot(stats_cur, settings, phase):
         stats_cur.execute("SELECT pg_current_wal_flush_lsn() AS lsn")
         snapshot["lsn"] = stats_cur.fetchone()["lsn"]
 
+    conn.commit() # Refer to 'notes' at the bottom of the file
     return snapshot    
 
 def wal_breakdown(conn, stats_cur, start_lsn, end_lsn):
@@ -199,15 +200,15 @@ def compute_metrics(conn, stats_cur, before, after, wall_time, do_wal_breakdown)
 
         "xact_commits": db_a["xact_commit"] - db_b["xact_commit"],
         "fsyncs": int(wal_io_a["fsyncs"] - wal_io_b["fsyncs"]),
-        "fsync_time_sec": round((wal_io_a["fsync_time"] - wal_io_b["fsync_time"]) / 1000, 3),
+        "fsync_time_sec": round((wal_io_a["fsync_time"] - wal_io_b["fsync_time"]) / 1000, 6),
         "writes": int(wal_io_a["writes"] - wal_io_b["writes"]),
-        "write_time_sec": round((wal_io_a["write_time"] - wal_io_b["write_time"]) / 1000, 3),
+        "write_time_sec": round((wal_io_a["write_time"] - wal_io_b["write_time"]) / 1000, 6),
 
         "wal_records": wal_stats_a["wal_records"] - wal_stats_b["wal_records"],
         "wal_bytes": int(wal_stats_a["wal_bytes"] - wal_stats_b["wal_bytes"]),
         "wal_fpi": wal_stats_a["wal_fpi"] - wal_stats_b["wal_fpi"],
 
-        "total_exec_time_sec": round(exec_time / 1000, 2),
+        "total_exec_time_sec": round(exec_time / 1000, 3),
         "stmt_calls": calls,
 
         "shared_blks_dirtied": shared_blks_dirtied,
@@ -252,7 +253,7 @@ def run_method(
     print(f"Running {name}", flush=True)
     trips_relfilenode = truncate_and_reset(conn, cur, stats_cur)
     print(f"Trips Relfilenode = {trips_relfilenode}")
-    before = snapshot(stats_cur, settings, "before")
+    before = snapshot(conn, stats_cur, settings, "before")
 
     t0 = time()
     try:
@@ -263,11 +264,12 @@ def run_method(
         return {"method": name, "error": str(e)}
     t1 = time()
 
-    after = snapshot(stats_cur, settings, "after")
+    after = snapshot(conn, stats_cur, settings, "after")
 
     metrics = compute_metrics(conn, stats_cur, before, after, t1 - t0, wal_breakdown)
     metrics["method"] = name
-    print(f"----- Start LSN = {metrics["start_lsn"]} End LSN = {metrics["end_lsn"]} -----")
+    if "start_lsn" in metrics: 
+        print(f"----- Start LSN = {metrics["start_lsn"]} End LSN = {metrics["end_lsn"]} -----")
 
     return metrics
 
@@ -357,3 +359,36 @@ def summarize(results, summary_file):
         summary[method] = entry
 
     Path(summary_file).write_text(json.dumps(summary, indent=4, default=str))   
+
+### notes : 
+"""
+ROUND 1 - method1 (autocommit ON)
+    conn.autocommit = True
+  
+ROUND 1 - method2 (autocommit OFF)
+───────────────────────────────────
+
+    conn.autocommit = True          ← run_method resets (fix)
+    truncate_and_reset()            ← runs in autocommit mode ✓
+    snapshot("before")              ← autocommit, no txn ✓
+    ┌─────────────────────────────┐
+    │ method2:                    │
+    │   conn.autocommit = False   │ ← starts implicit txn
+    │   INSERT x 100k             │
+    │   conn.commit()             │ ← txn ends, stats flushed
+    └─────────────────────────────┘
+    snapshot("after")               ← autocommit still False!
+                                        stats_cur queries open a NEW
+                                        implicit txn (never committed)
+  ─────────────────────────────────
+    conn state at end of round: autocommit=False, txn OPEN
+
+ROUND 2 - method3
+───────────────────────────────────
+
+    conn.autocommit = True          ←  ERROR HERE
+                                        "set_session cannot be used
+                                        inside a transaction"
+                                        (the txn from snapshot("after")
+                                        is still open)   
+"""

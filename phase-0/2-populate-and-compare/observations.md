@@ -9,10 +9,10 @@ Tuple Data Section :
 | `bigint` | `trip_id` | 8B |
 | `timestamp` | `tpep_pickup_datetime`, `tpep_dropoff_datetime` | 2 x 8B = 16 |
 | `smallint` | `vendor_id`, `passenger_count`, `ratecode_id`, `payment_type` | 4 x 2B = 8 |
-| `char(1)` | `store_and_fwd_flag` | 1 |
+| `char(1)` | `store_and_fwd_flag` | 2 |
 | `integer` | `pu_location_id`, `do_location_id` | 2 x 4B = 8 |
 | `real` | 10 amount/distance columns | 10 x 4B = 40 |
-| **Total** | | **81** |
+| **Total** | | **82** |
 
 Approximations: 
 
@@ -23,25 +23,27 @@ Total size of a page = 8 KB = 8192 bytes
 PageHeaderData (fixed) = 24 bytes
 ItemData Line Pointer Array = 4 bytes x N rows
 
-HeapTupleHeaderData = 24 bytes (23 max aligned)
-Tuple Data Secion = 81 bytes 
-Total = 105 bytes
-MAX-ALIGNED = 112 bytes
+null bit map for each column = 20 bits = 3 bytes
+HeapTupleHeaderData = 23 bytes
+HeapTupleHeaderData + null bit map = 26 = 32 MAX ALIGNED
+Tuple Data Secion = 82 bytes 
+Total = 117 bytes
+MAX-ALIGNED = 120 bytes
 
-24 + 112 x N + 4 x N = 8192
-116 x N = 8168
+24 + 120 x N + 4 x N = 8192
+124 x N = 8168
 
-Rows per page = N ~ 70.4 ~ 70
+Rows per page = N ~ 65
 
-24 + 116 x 70 = 8144
-Remaining space = 8192 - 8144 = 48 bytes
+24 + 124 x 65 = 8084
+Remaining space = 8192 - 8084 = 108 bytes
 
 -----------------
 
 Rows = 100_000
-Rows per page ~ 70
+Rows per page ~ 65
+Number of pages = 100_000/65 ≈ 1539
 Relation size ~ 12 MB
-Number of pages ~ 1429
 ```
 --- 
 ## Selecting Representative Round for Comparison
