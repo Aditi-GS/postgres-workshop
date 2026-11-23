@@ -23,7 +23,7 @@ Total size of a page = 8 KB = 8192 bytes
 PageHeaderData (fixed) = 24 bytes
 ItemData Line Pointer Array = 4 bytes x N rows
 
-HeapTupleHeaderData = 24 bytes (23 max aligned)
+HeapTupleHeaderData = 24 bytes (MAX ALIGNED 23 bytes)
 Tuple Data Secion = 81 bytes 
 Total = 105 bytes
 MAX-ALIGNED = 112 bytes
@@ -159,7 +159,7 @@ Transaction/COMMIT
 XLOG 25317 (taxi_zones_lookup)
 XLOG fork fsm FPW
 ```
-In between, 3 more `Sequence/LOG` and 1 more Heap/INSERT+INIT records were present.
+In between the 98 record sequences, 3 more `Sequence/LOG` and 1 more Heap/INSERT+INIT records were present.
 
 ## relfilenode & ::regclass
 

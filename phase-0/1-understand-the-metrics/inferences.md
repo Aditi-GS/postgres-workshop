@@ -46,7 +46,7 @@ SELECT relname, indexrelname, idx_blks_read FROM pg_statio_all_indexes where rel
 
 ## Round 1: 
 
-Round 1 was run right after dropping all tables if they already exist and indexes and then adding back all table but no indexes to the database. 
+Round 1 was run right after dropping all tables and indexes if they already exist and then adding back all table but no indexes to the database. 
 
 - It took `384 ms` to finish at the rate of `260 rows per sec`.
 - The total spent fsyncing the inserts is `342 ms` - around 89% of the total time is spent in fsyncing.
@@ -69,6 +69,9 @@ ORDER BY shared_blks_dirtied DESC;
 rmgr: XLOG        len (rec/tot):     49/  8241, tx:     740341, lsn: 0/498FF980, prev 0/498FF958, desc: FPI_FOR_HINT , blkref #0: rel 1663/16388/25339 fork fsm blk 2 FPW
 ``` 
 
+### Questions
+1. If the FSM isn't used for allocation on small tables, why does it get dirtied at all ? The FSM fork exists but I thought it would be untouched - what exactly writes to FSM block 2 of a 2-page main-fork table ?
+
 ### WAL
 ```
 Approx number of segments = wal_bytes / 16 MB = 102095 / 16 MB = 0.097 MB < 1 
@@ -78,7 +81,7 @@ Approx number of segments = wal_bytes / 16 MB = 102095 / 16 MB = 0.097 MB < 1
 
 ## Round 2 and 3: 
 
-Round 2 and 3 were run after truncating the existing `trips` table. All the other lookup tables are present as is from Round 1's recreation of dropped tables. 
+Round 2 and 3 were run after truncating the existing `trips` table. All the other lookup tables are present as is from Round 1's recreation after dropped tables. 
 
 - `12` blocks are dirited while inserting 100 rows:
 ```sql
@@ -89,8 +92,6 @@ query ILIKE 'INSERT INTO trips%'
 ORDER BY shared_blks_dirtied DESC;
 -- 100 | 12 | 6
 ```
-- What does this mean or indicate ???
-
 
 ### [WAL Records (Resource Manager/Record Type)](./notes.md#1-wal-records-resource-managerrecord-type)
 
