@@ -27,7 +27,7 @@ null bit map for each column = 20 bits = 3 bytes
 HeapTupleHeaderData = 23 bytes
 HeapTupleHeaderData + null bit map = 26 = 32 MAX ALIGNED
 Tuple Data Secion = 82 bytes 
-Total = 117 bytes
+Total = 114 bytes
 MAX-ALIGNED = 120 bytes
 
 24 + 120 x N + 4 x N = 8192
