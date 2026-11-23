@@ -52,7 +52,6 @@ Upon recieving all 4 messages:
 
 Index AMs can allocate memory in and store a pointer in `rd_amcache` for relation-level caching to avoid redundant calculations.
 
-
 # 1. WAL Records (Resource Manager/Record Type)
 
 ## 1. Heap/LOCK
