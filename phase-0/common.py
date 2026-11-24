@@ -121,7 +121,7 @@ def snapshot(conn, stats_cur, settings, phase):
     snapshot = {}
 
     # For "after": capture LSN FIRST
-    if phase == "after":
+    if phase == "after" or phase == "before":
         stats_cur.execute("SELECT pg_current_wal_lsn() AS lsn")
         snapshot["lsn"] = stats_cur.fetchone()["lsn"]
  
@@ -158,11 +158,6 @@ def snapshot(conn, stats_cur, settings, phase):
     snapshot["rel_size"] = stats_cur.fetchone()["pg_size_pretty"]
     stats_cur.execute("SELECT pg_relation_size('trips')")
     snapshot["rel_size_bytes"] = stats_cur.fetchone()["pg_relation_size"]
-
-    # For "before": capture LSN LAST
-    if phase == "before":
-        stats_cur.execute("SELECT pg_current_wal_flush_lsn() AS lsn")
-        snapshot["lsn"] = stats_cur.fetchone()["lsn"]
 
     conn.commit() # Refer to 'notes' at the bottom of the file
     return snapshot    
